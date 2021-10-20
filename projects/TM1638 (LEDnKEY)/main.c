@@ -13,21 +13,25 @@
 #define SEG_3 0b01001111
 #define SEG_4 0b01100110
 #define SEG_5 0b01101101
-#define SEG_6 0b01011111
+#define SEG_6 0b01111101
 #define SEG_7 0b00000111
 #define SEG_8 0b01111111
-#define SEG_9 0b01100111
+#define SEG_9 0b01101111
 #define SEG_0 0b00111111
+#define SEG_DOT 0b10000000
+#define SEG_BLANK 0b00000000
 
 // inverted grid, idk why they made the module like that...
-#define GRID1_ADDR 0x0E
-#define GRID2_ADDR 0x0C
-#define GRID3_ADDR 0x0A
-#define GRID4_ADDR 0x08
-#define GRID5_ADDR 0x06
-#define GRID6_ADDR 0x04
-#define GRID7_ADDR 0x02
-#define GRID8_ADDR 0x00
+#define DISPLAY_1 0x0E
+#define DISPLAY_2 0x0C
+#define DISPLAY_3 0x0A
+#define DISPLAY_4 0x08
+#define DISPLAY_5 0x06
+#define DISPLAY_6 0x04
+#define DISPLAY_7 0x02
+#define DISPLAY_8 0x00
+
+uint8_t value_to_seg[10] = {SEG_0, SEG_1, SEG_2, SEG_3, SEG_4, SEG_5, SEG_6, SEG_7, SEG_8, SEG_9};
 
 #define CMD_DATA_COMMAND 0x40
 #define CMD_SET_ADDR 0xC0
@@ -76,6 +80,48 @@ static void send_data(int8_t byte, int8_t data){
 	PORTB |= (1 << TM_STB);
 }
 
+static void display_digit(int8_t addr, uint8_t digit){
+	if(digit >= 0 && digit <= 9){
+		send_data(CMD_SET_ADDR | addr, value_to_seg[digit]);
+	}else {
+		send_data(CMD_SET_ADDR | addr, SEG_BLANK);
+	}
+}
+
+void display_number(uint32_t num){
+	uint8_t disp = DISPLAY_1;
+	
+	// special cases
+	if(num == 0){
+		display_digit(disp, num);
+		disp -= 0x02;
+	} else if(num > 99999999){
+		num = 0; // error, display only a Dot, to indicate error
+		send_data(CMD_SET_ADDR | disp, SEG_DOT);
+		disp -= 0x02;
+	}
+
+	// write all digitss
+	while(num > 0){
+		display_digit(disp, num%10);
+        num /= 10;
+		
+		if(disp == 0x00){
+			return;
+		}
+		disp -= 0x02; // jump to the next display
+    }
+
+	// clears the rest of the display
+	while (disp >= 0x00){
+		send_data(CMD_SET_ADDR | disp, SEG_BLANK);
+
+		if(disp == 0x00){
+			break;
+		}
+		disp -= 0x02;
+	}
+}
 
 
 int main(void){
@@ -87,8 +133,7 @@ int main(void){
 		send_data(CMD_SET_ADDR|i, 0x00);
 	}
 
-	send_cmd(CMD_DATA_COMMAND);
-	send_data(0x0A, SEG_1);
+	display_number(99999999);
 
 	/* loop */
 	while (1) {

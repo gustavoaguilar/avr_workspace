@@ -54,7 +54,7 @@ MCU_TARGET     = attiny85
 #MCU_TARGET     = attiny861
 OPTIMIZE       = -O2
 DEFS           =
-LIBS           = tm1638.c
+LIBS           = #tm1638.c
 # You should not have to change anything below here.
 CC             = avr-gcc
 # Override is only needed by avr-lib build system.
