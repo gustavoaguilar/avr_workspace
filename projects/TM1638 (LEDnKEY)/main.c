@@ -31,6 +31,15 @@
 #define DISPLAY_7 0x02
 #define DISPLAY_8 0x00
 
+#define LED_1 0x01
+#define LED_2 0x03
+#define LED_3 0x05
+#define LED_4 0x07
+#define LED_5 0x09
+#define LED_6 0x0B
+#define LED_7 0x0D
+#define LED_8 0x0F
+
 uint8_t value_to_seg[10] = {SEG_0, SEG_1, SEG_2, SEG_3, SEG_4, SEG_5, SEG_6, SEG_7, SEG_8, SEG_9};
 
 #define CMD_DATA_COMMAND 0x40
@@ -123,6 +132,10 @@ void display_number(uint32_t num){
 	}
 }
 
+void write_led(uint8_t addr, uint8_t state){
+	
+	send_data(CMD_SET_ADDR | addr, state);
+}
 
 int main(void){
 	mcu_init();
@@ -133,7 +146,8 @@ int main(void){
 		send_data(CMD_SET_ADDR|i, 0x00);
 	}
 
-	display_number(99999999);
+	// display_number(99999999);
+	write_led(LED_6, 1);
 
 	/* loop */
 	while (1) {
