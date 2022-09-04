@@ -25,6 +25,7 @@ OBJ            = main.o
 #MCU_TARGET     = atmega324p
 #MCU_TARGET     = atmega325
 #MCU_TARGET     = atmega3250
+#MCU_TARGET     = atmega328p
 #MCU_TARGET     = atmega329
 #MCU_TARGET     = atmega3290
 #MCU_TARGET     = atmega32u4
@@ -50,7 +51,8 @@ OBJ            = main.o
 #MCU_TARGET     = attiny45
 #MCU_TARGET     = attiny461
 #MCU_TARGET     = attiny84
-MCU_TARGET     = attiny85
+#MCU_TARGET     = attiny85
+#MCU_TARGET     = attiny88
 #MCU_TARGET     = attiny861
 OPTIMIZE       = -O2
 DEFS           =
@@ -113,5 +115,5 @@ pdf: $(PRG).pdf
 %.png: %.fig
 	$(FIG2DEV) -L png $< $@
 
-write:
-	avrdude -c usbasp -p attiny85 -b 19200 -U flash:w:main.hex:i
+flash:
+	avrdude -c usbasp -p $(MCU_TARGET) -b 19200 -U flash:w:main.hex:i
