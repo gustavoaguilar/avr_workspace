@@ -13,7 +13,7 @@
 #define pin_dir_output(port, pin) port |= _BV(pin)
 #define pin_dir_input(port, pin) port &= ~_BV(pin)
 
-t_UART UART;
+UART_t UART;
 
 ISR(USART_TX_vect){
     if(UART.buffer_tx_start < UART.buffer_tx_end){

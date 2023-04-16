@@ -32,9 +32,9 @@ typedef struct{
     uint8_t buffer_rx[UART_MAX_BUFFER_RX_SIZE];
     uint8_t buffer_rx_start;
     uint8_t buffer_rx_end;
-}t_UART;
+}UART_t;
 
-extern t_UART UART;
+extern UART_t UART;
 extern uint8_t pos;
 
 void uart_init(){
@@ -58,17 +58,17 @@ void safe_increment_byte(uint8_t *value, uint8_t max_value){
         *value = 0;
 }
 
-void uart_send_byte(t_UART *uart,uint8_t byte){
+void uart_send_byte(UART_t *uart,uint8_t byte){
     safe_increment_byte(&(uart->buffer_tx_end), UART_MAX_BUFFER_TX_SIZE);
     uart->buffer_tx[uart->buffer_tx_end] = byte; 
 }
 
-void uart_receive_byte(t_UART *uart, uint8_t byte){
+void uart_receive_byte(UART_t *uart, uint8_t byte){
     safe_increment_byte(&(uart->buffer_rx_end), UART_MAX_BUFFER_RX_SIZE);
     uart->buffer_rx[uart->buffer_rx_end] = byte; 
 }
 
-void uart_send_string(t_UART *uart, char* str, uint16_t size){
+void uart_send_string(UART_t *uart, char* str, uint16_t size){
     while(*str != '\0' && size > 0){
         uart_send_byte(uart, *str);
         str++;
