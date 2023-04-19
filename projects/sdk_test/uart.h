@@ -89,11 +89,24 @@ void uart_send_string(UART_t *uart, char* str, uint16_t size){
     */ 
 }
 
-void uart_send_start(){
-    UCSR0B |= _BV(UDRIE0);
+void uart_send_integer(UART_t *uart, uint32_t integer){
+    uint8_t digit;
+    uint8_t array[10] = {0,0,0,0,0,0,0,0,0,0};
+    uint8_t j = 9;
+
+    while(integer > 0){
+        digit = integer % 10;
+        array[j] = digit + '0';
+        j--;
+        integer /= 10;
+    }
+
+    for(; j < 10; j++){
+        uart_send_byte(uart, array[j]);
+    }
 }
 
-void uart_send_blocking(){
-
+void uart_send_start(){
+    UCSR0B |= _BV(UDRIE0);
 }
 #endif

@@ -32,27 +32,36 @@ ISR(USART_UDRE_vect){
 }
 
 ISR(USART_RX_vect){
-        safe_increment_byte(&UART.buffer_rx_end, UART_MAX_BUFFER_RX_SIZE);
-        UART.buffer_rx[UART.buffer_rx_end] = UDR0;
+    safe_increment_byte(&UART.buffer_rx_end, UART_MAX_BUFFER_RX_SIZE);
+    UART.buffer_rx[UART.buffer_rx_end] = UDR0;
 }
 
 void main(void){
-    uint8_t i;
+    uint32_t num = 0;
     pin_dir_output(DDRB, PB5);
 
     uart_init();
 
-    UART.buffer_rx_start =0;
-    UART.buffer_rx_end =0;
-    UART.buffer_tx_start = 0;
-    UART.buffer_tx_end = 0;
-
     sei();
         
     while(1){
-        _delay_ms(500);
-        uart_send_string(&UART, "________\r\n", 11);
+        // _delay_ms(500);
+        // uart_send_string(&UART, "________\r\n", 11);
+        // uart_send_start();
+        _delay_ms(1000);
+
+        num++;
+        uart_send_integer(&UART, num);
+        uart_send_byte(&UART, '\r');
+        uart_send_byte(&UART, '\n');
         uart_send_start();
+
+        if(UART.buffer_rx_end != UART.buffer_rx_start){
+            safe_increment_byte(&(UART.buffer_rx_start), UART_MAX_BUFFER_RX_SIZE);
+            // // uart_send_byte(&UART, UART.buffer_rx[UART.buffer_rx_start]);
+            // uart_send_start();
+
+        }
     }
 
 }
