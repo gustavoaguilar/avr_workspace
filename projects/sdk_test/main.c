@@ -5,8 +5,8 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
-
 #include "uart.h"
+#include "timer.h"
 
 #define pin_set(port, pin) port |= _BV(pin)
 #define pin_clear(port, pin) port &= ~_BV(pin)
@@ -14,6 +14,43 @@
 #define pin_dir_input(port, pin) port &= ~_BV(pin)
 
 UART_t UART;
+Timer_t timer;
+
+uint32_t period_timer;
+
+void main(void){
+    pin_dir_output(DDRB, PB5);
+    pin_dir_output(DDRB, PB4);
+
+    uart_init();
+    timer_init();
+
+    sei();
+
+    period_timer = timer_get();
+        
+    while(1){
+
+        if(timer_wait(5, period_timer)){
+            period_timer = timer_get();
+            uart_send_integer(&UART, timer.timestamp);
+            uart_send_byte(&UART, '\r');
+            // uart_send_byte(&UART, '\n');
+            uart_send_start();
+
+        }
+        // _delay_ms(100);
+
+
+        // if(UART.buffer_rx_end != UART.buffer_rx_start){
+        //     safe_increment_byte(&(UART.buffer_rx_start), UART_MAX_BUFFER_RX_SIZE);
+        //     // // uart_send_byte(&UART, UART.buffer_rx[UART.buffer_rx_start]);
+        //     // uart_send_start();
+
+        // }
+    }
+
+}
 
 ISR(USART_TX_vect){
     if(UART.buffer_tx_start < UART.buffer_tx_end){
@@ -36,32 +73,12 @@ ISR(USART_RX_vect){
     UART.buffer_rx[UART.buffer_rx_end] = UDR0;
 }
 
-void main(void){
-    uint32_t num = 0;
-    pin_dir_output(DDRB, PB5);
-
-    uart_init();
-
-    sei();
-        
-    while(1){
-        // _delay_ms(500);
-        // uart_send_string(&UART, "________\r\n", 11);
-        // uart_send_start();
-        _delay_ms(1000);
-
-        num++;
-        uart_send_integer(&UART, num);
-        uart_send_byte(&UART, '\r');
-        uart_send_byte(&UART, '\n');
-        uart_send_start();
-
-        if(UART.buffer_rx_end != UART.buffer_rx_start){
-            safe_increment_byte(&(UART.buffer_rx_start), UART_MAX_BUFFER_RX_SIZE);
-            // // uart_send_byte(&UART, UART.buffer_rx[UART.buffer_rx_start]);
-            // uart_send_start();
-
-        }
+ISR(TIMER0_OVF_vect){
+    TCNT0 = 6;
+    timer.ms_counter++;
+    if(timer.ms_counter >= 1000){
+        timer.ms_counter = 0;
+        timer.timestamp++;
     }
-
+    PORTB ^= (1 << PB4); // toggle pin
 }
