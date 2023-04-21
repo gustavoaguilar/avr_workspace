@@ -7,6 +7,7 @@
 
 #include "uart.h"
 #include "timer.h"
+#include "adc.h"
 
 #define pin_set(port, pin) port |= _BV(pin)
 #define pin_clear(port, pin) port &= ~_BV(pin)
@@ -24,6 +25,7 @@ void main(void){
 
     uart_init();
     timer_init();
+    adc_init();
 
     sei();
 
@@ -31,13 +33,13 @@ void main(void){
         
     while(1){
 
-        if(timer_wait(5, period_timer)){
+        if(timer_wait(1, period_timer)){
             period_timer = timer_get();
-            uart_send_integer(&UART, timer.timestamp);
+            uart_send_string(&UART, "Sensor AD: ", 12);
+            uart_send_integer(&UART, adc_get_value(7));
             uart_send_byte(&UART, '\r');
-            // uart_send_byte(&UART, '\n');
+            uart_send_byte(&UART, '\n');
             uart_send_start();
-
         }
         // _delay_ms(100);
 
@@ -82,3 +84,11 @@ ISR(TIMER0_OVF_vect){
     }
     PORTB ^= (1 << PB4); // toggle pin
 }
+
+// ISR(ADC_vect){
+//     uart_send_integer(&UART, (uint32_t) ADC);
+//     uart_send_byte(&UART, '\r');
+//     uart_send_start();
+
+//     ADCSRA |= (1 << ADSC); // Triggers the next convertion
+// }
