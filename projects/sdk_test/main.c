@@ -8,6 +8,7 @@
 #include "uart.h"
 #include "timer.h"
 #include "adc.h"
+#include "i2c.h"
 
 #define pin_set(port, pin) port |= _BV(pin)
 #define pin_clear(port, pin) port &= ~_BV(pin)
@@ -20,26 +21,39 @@ Timer_t timer;
 uint32_t period_timer;
 
 void main(void){
+    uint8_t i2c_led_value = 0;
     pin_dir_output(DDRB, PB5);
     pin_dir_output(DDRB, PB4);
 
     uart_init();
     timer_init();
     adc_init();
+    i2c_init();
 
     sei();
 
     period_timer = timer_get();
+
+    // i2c_write_byte_read(4);
+    // uart_send_start();
         
     while(1){
 
         if(timer_wait(1, period_timer)){
             period_timer = timer_get();
-            uart_send_string(&UART, "Sensor AD: ", 12);
-            uart_send_integer(&UART, adc_get_value(7));
-            uart_send_byte(&UART, '\r');
-            uart_send_byte(&UART, '\n');
-            uart_send_start();
+            // uart_send_string(&UART, "Sensor AD: ", 12);
+            // uart_send_integer(&UART, adc_get_value(7));
+            // uart_send_byte(&UART, '\r');
+            // uart_send_byte(&UART, '\n');
+            // uart_send_start();
+
+            i2c_write_byte(4, i2c_led_value);
+            if(i2c_led_value)
+                i2c_led_value = 0;
+            else
+                i2c_led_value = 1;
+            _delay_ms(100);
+            i2c_write_byte_read(4);
         }
         // _delay_ms(100);
 
