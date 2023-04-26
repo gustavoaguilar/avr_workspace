@@ -34,9 +34,6 @@ void main(void){
 
     period_timer = timer_get();
 
-    // i2c_write_byte_read(4);
-    // uart_send_start();
-        
     while(1){
 
         if(timer_wait(1, period_timer)){
@@ -53,7 +50,7 @@ void main(void){
             else
                 i2c_led_value = 1;
             _delay_ms(100);
-            i2c_write_byte_read(4);
+            i2c_read_byte(4);
         }
         // _delay_ms(100);
 

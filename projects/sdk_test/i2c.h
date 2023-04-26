@@ -75,7 +75,7 @@ void i2c_write_byte(uint8_t addr, uint8_t byte){
     TWCR = _BV(TWINT) | _BV(TWEN) | _BV(TWSTO);
 }
 
-void i2c_write_byte_read(uint8_t addr){
+void i2c_read_byte(uint8_t addr){
 
     // uart_send_string(&UART, "Sending Start!\r\n", 17);
     TWCR |= _BV(TWINT) | _BV(TWSTA);
